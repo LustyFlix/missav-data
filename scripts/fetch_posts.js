@@ -3,7 +3,7 @@ const path = require("path");
 const fetch = require("node-fetch");
 const xml2js = require("xml2js");
 
-// Example sitemap URL
+// List of sitemap URLs
 const SITEMAP_URLS = [
   "https://eroticmv.com/post-sitemap.xml",
   "https://eroticmv.com/post-sitemap2.xml"
@@ -15,7 +15,7 @@ const INDEX_FILE = path.join(__dirname, "../data/index.json");
 // Ensure folder exists
 if (!fs.existsSync(POSTS_DIR)) fs.mkdirSync(POSTS_DIR, { recursive: true });
 
-// Safe load index.json
+// Load index.json safely
 let index = {};
 if (fs.existsSync(INDEX_FILE)) {
   try {
@@ -27,6 +27,7 @@ if (fs.existsSync(INDEX_FILE)) {
   }
 }
 
+// Parse sitemap XML into URLs
 async function fetchSitemap(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch " + url);
@@ -37,10 +38,12 @@ async function fetchSitemap(url) {
   return urls;
 }
 
+// Create a safe filename from URL
 function slugFromUrl(url) {
   return url.replace(/https?:\/\/[^\/]+\/|\/$/g, "").replace(/\//g, "-") + ".html";
 }
 
+// Download a single post
 async function downloadPost(url) {
   if (index[url]) {
     console.log("Already downloaded:", url);
@@ -63,19 +66,26 @@ async function downloadPost(url) {
   }
 }
 
+// Main function: fetch all sitemaps and posts
 (async function run() {
   for (const sitemap of SITEMAP_URLS) {
     console.log("Processing sitemap:", sitemap);
     try {
       const urls = await fetchSitemap(sitemap);
-      for (const url of urls) {
-        await downloadPost(url);
+
+      // Download posts in parallel (10 at a time)
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+        const batch = urls.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map(downloadPost));
       }
+
     } catch (err) {
       console.error("Error processing sitemap:", sitemap, err.message);
     }
   }
 
-  // Save index.json
+  // Save updated index.json
   fs.writeFileSync(INDEX_FILE, JSON.stringify(index, null, 2));
+  console.log("Finished updating posts. Total posts:", Object.keys(index).length);
 })();
