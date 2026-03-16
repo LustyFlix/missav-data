@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const fetch = require("node-fetch");
 const xml2js = require("xml2js");
 
 // List of sitemap URLs
@@ -12,7 +11,7 @@ const SITEMAP_URLS = [
 const POSTS_DIR = path.join(__dirname, "../data/posts");
 const INDEX_FILE = path.join(__dirname, "../data/index.json");
 
-// Ensure folder exists
+// Ensure posts folder exists
 if (!fs.existsSync(POSTS_DIR)) fs.mkdirSync(POSTS_DIR, { recursive: true });
 
 // Load index.json safely
@@ -38,12 +37,12 @@ async function fetchSitemap(url) {
   return urls;
 }
 
-// Create a safe filename from URL
+// Convert post URL into safe filename
 function slugFromUrl(url) {
   return url.replace(/https?:\/\/[^\/]+\/|\/$/g, "").replace(/\//g, "-") + ".html";
 }
 
-// Download a single post
+// Download a single post HTML
 async function downloadPost(url) {
   if (index[url]) {
     console.log("Already downloaded:", url);
@@ -66,14 +65,14 @@ async function downloadPost(url) {
   }
 }
 
-// Main function: fetch all sitemaps and posts
+// Main function
 (async function run() {
   for (const sitemap of SITEMAP_URLS) {
     console.log("Processing sitemap:", sitemap);
     try {
       const urls = await fetchSitemap(sitemap);
 
-      // Download posts in parallel (10 at a time)
+      // Parallel downloads in batches of 10
       const BATCH_SIZE = 10;
       for (let i = 0; i < urls.length; i += BATCH_SIZE) {
         const batch = urls.slice(i, i + BATCH_SIZE);
