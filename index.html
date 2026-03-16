@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post Archive</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    h1 { text-align: center; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+    a { text-decoration: none; color: #0077cc; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Post Archive</h1>
+  <ul id="post-list"></ul>
+
+  <script>
+    fetch("./data/index.json")
+      .then(res => res.json())
+      .then(index => {
+        const ul = document.getElementById("post-list");
+        Object.entries(index).forEach(([url, relativePath]) => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = "./data/posts/" + relativePath;
+          a.textContent = url;
+          a.target = "_blank";
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+      })
+      .catch(err => console.error("Failed to load posts:", err));
+  </script>
+</body>
+</html>
