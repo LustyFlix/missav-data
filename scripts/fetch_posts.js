@@ -5,8 +5,8 @@ const xml2js = require("xml2js");
 
 // Example sitemap URL
 const SITEMAP_URLS = [
-  "https://eroticmv.com/sitemap-posts-1.xml",
-  "https://eroticmv.com/sitemap-posts-2.xml"
+  "https://eroticmv.com/post-sitemap.xml",
+  "https://eroticmv.com/post-sitemap2.xml"
 ];
 
 const POSTS_DIR = path.join(__dirname, "../data/posts");
