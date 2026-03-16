@@ -12,13 +12,19 @@ const SITEMAP_URLS = [
 const POSTS_DIR = path.join(__dirname, "../data/posts");
 const INDEX_FILE = path.join(__dirname, "../data/index.json");
 
-// Ensure folders exist
+// Ensure folder exists
 if (!fs.existsSync(POSTS_DIR)) fs.mkdirSync(POSTS_DIR, { recursive: true });
 
-// Load index.json to skip existing posts
+// Safe load index.json
 let index = {};
 if (fs.existsSync(INDEX_FILE)) {
-  index = JSON.parse(fs.readFileSync(INDEX_FILE));
+  try {
+    const raw = fs.readFileSync(INDEX_FILE, "utf-8").trim();
+    index = raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    console.warn("Warning: index.json is corrupted or empty. Resetting index.");
+    index = {};
+  }
 }
 
 async function fetchSitemap(url) {
