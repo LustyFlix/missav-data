@@ -4,7 +4,6 @@ const xml2js = require("xml2js");
 
 // List of sitemap URLs
 const SITEMAP_URLS = [
-  "https://eroticmv.com/post-sitemap.xml",
   "https://eroticmv.com/post-sitemap2.xml"
 ];
 
