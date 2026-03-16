@@ -11,7 +11,7 @@ const SITEMAP_URLS = [
 const POSTS_DIR = path.join(__dirname, "../data/posts");
 const INDEX_FILE = path.join(__dirname, "../data/index.json");
 
-// Ensure posts folder exists
+// Ensure base posts folder exists
 if (!fs.existsSync(POSTS_DIR)) fs.mkdirSync(POSTS_DIR, { recursive: true });
 
 // Load index.json safely
@@ -37,9 +37,13 @@ async function fetchSitemap(url) {
   return urls;
 }
 
-// Convert post URL into safe filename
+// Convert post URL into safe relative path with subfolder
 function slugFromUrl(url) {
-  return url.replace(/https?:\/\/[^\/]+\/|\/$/g, "").replace(/\//g, "-") + ".html";
+  const slug = url.replace(/https?:\/\/[^\/]+\/|\/$/g, "").replace(/\//g, "-") + ".html";
+  const prefix = slug.slice(0, 2); // first 2 chars of slug as subfolder
+  const dir = path.join(POSTS_DIR, prefix);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return path.join(prefix, slug); // relative path for index.json
 }
 
 // Download a single post HTML
@@ -54,11 +58,11 @@ async function downloadPost(url) {
     if (!res.ok) throw new Error("Failed to fetch post");
     const html = await res.text();
 
-    const slug = slugFromUrl(url);
-    const filePath = path.join(POSTS_DIR, slug);
+    const relativePath = slugFromUrl(url);
+    const filePath = path.join(POSTS_DIR, relativePath);
     fs.writeFileSync(filePath, html, "utf-8");
 
-    index[url] = slug;
+    index[url] = relativePath;
     console.log("Saved:", url);
   } catch (err) {
     console.error("Error downloading:", url, err.message);
