@@ -2,7 +2,7 @@ name: Update Posts
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # once per day
+    - cron: "0 0 * * *"  # run once per day at 00:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install node-fetch xml2js
+        run: npm install xml2js
 
       - name: Run scraper
         run: node scripts/fetch_posts.js
